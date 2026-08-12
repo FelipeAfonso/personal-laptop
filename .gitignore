@@ -7,5 +7,4 @@ zsh/.zcompdump*
 zsh/.secrets.env
 *.zwc
 .DS_Store
-dunst/notification.log
-hypr/*.mkv
+karabiner/automatic_backups/

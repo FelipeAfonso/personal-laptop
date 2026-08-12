@@ -1,5 +1,5 @@
 window-decoration = false
-command = /usr/bin/zsh -l -c "tmux new-session -A -s main"
+command = /bin/zsh -l -c "tmux new-session -A -s main"
 font-family = "CaskaydiaCove Nerd Font"
 font-feature = -calt
 font-size = 20

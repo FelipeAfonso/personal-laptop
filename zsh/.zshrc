@@ -5,7 +5,7 @@ export EDITOR=nvim
 export BROWSER=zen-browser
 export PAGER=less
 export FORCE_COLOR=1
-export NVM_DIR=/usr/share/nvm
+export NVM_DIR="/opt/homebrew/opt/nvm"
 export BUN_INSTALL="$HOME/.bun"
 export PNPM_HOME="$HOME/.local/share/pnpm"
 
@@ -78,19 +78,20 @@ zle-line-init() { echo -ne '\e[3 q' }
 zle -N zle-line-init
 
 # --- SSH agent ---
-if [[ -z "$SSH_AGENT_PID" ]] || ! kill -0 "$SSH_AGENT_PID" 2>/dev/null; then
+# macOS launchd provides an agent via SSH_AUTH_SOCK; only spawn when absent
+if [[ -z "$SSH_AUTH_SOCK" ]]; then
   eval "$(ssh-agent -s)" >/dev/null
 fi
 
-# --- NVM (lazy) ---
+# --- NVM (lazy, homebrew) ---
 if [[ -d "$NVM_DIR" ]]; then
   nvm() {
     unfunction nvm
-    source "$NVM_DIR/init-nvm.sh"
+    source "$NVM_DIR/nvm.sh"
     nvm "$@"
   }
   if [[ -f .nvmrc ]]; then
-    source "$NVM_DIR/init-nvm.sh"
+    source "$NVM_DIR/nvm.sh"
     nvm use
   fi
 fi
@@ -102,9 +103,9 @@ eval "$(fzf --zsh)"
 # cd=z after zoxide init so the alias points to the real function
 alias cd="z"
 
-# --- Plugins ---
+# --- Plugins (homebrew) ---
 for p in zsh-autosuggestions zsh-syntax-highlighting zsh-history-substring-search; do
-  [[ -f "/usr/share/zsh/plugins/$p/$p.zsh" ]] && source "/usr/share/zsh/plugins/$p/$p.zsh"
+  [[ -f "/opt/homebrew/share/$p/$p.zsh" ]] && source "/opt/homebrew/share/$p/$p.zsh"
 done
 
 # --- Wallust colors (dynamic theming) ---

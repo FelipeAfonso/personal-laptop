@@ -1,26 +1,23 @@
 #!/bin/sh
-# Apply this repo's configs to the machine. /etc files and services are not
-# touched — see README for those steps.
+# Apply this repo's configs to the machine. Packages are separate:
+# `brew bundle --file=Brewfile`.
 set -eu
 
-dirs="ghostty dunst hypr nvim opencode rofi tmux waybar wallust xkb zsh starship lazygit btop MangoHud git gtk-3.0 gtk-4.0"
-files="mimeapps.list user-dirs.dirs"
+dirs="ghostty nvim opencode tmux zsh starship lazygit btop git karabiner"
 
 for d in $dirs; do
   cp -rf "./$d" "$HOME/.config/"
 done
 
-for f in $files; do
-  cp -f "./$f" "$HOME/.config/"
-done
-
 cp -f ./zsh/.zshenv "$HOME/.zshenv"
+cp -f ./aerospace/aerospace.toml "$HOME/.aerospace.toml"
+
+# Frozen wallust palette so neopywal keeps miskatonic's colors
+mkdir -p "$HOME/.cache/wallust"
+cp -f ./nvim/colors_neopywal.vim "$HOME/.cache/wallust/colors_neopywal.vim"
 
 mkdir -p "$HOME/.local/bin"
 cp -f ./bin/* "$HOME/.local/bin/"
 for s in ./bin/*; do
   chmod +x "$HOME/.local/bin/$(basename "$s")"
 done
-
-mkdir -p "$HOME/.config/systemd/user"
-cp -f ./systemd/user/* "$HOME/.config/systemd/user/"

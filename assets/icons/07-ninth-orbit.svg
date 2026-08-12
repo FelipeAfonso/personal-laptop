@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="yuggoth">
+  <title>yuggoth — the ninth orbit</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#23262f"/>
+      <stop offset="1" stop-color="#14161c"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="62" height="62" rx="14" fill="url(#bg)" stroke="#3a3f4d" stroke-width="2"/>
+  <circle cx="32" cy="32" r="3" fill="#FFD584"/>
+  <circle cx="32" cy="32" r="9" fill="none" stroke="#A0C6B8" stroke-width="1.5" opacity="0.4"/>
+  <circle cx="32" cy="32" r="15" fill="none" stroke="#A0C6B8" stroke-width="1.5" opacity="0.4"/>
+  <circle cx="32" cy="32" r="21" fill="none" stroke="#A0C6B8" stroke-width="2"/>
+  <circle cx="17.2" cy="17.2" r="3" fill="none" stroke="#A0C6B8" stroke-width="2.5"/>
+  <circle cx="17.2" cy="17.2" r="1" fill="#FFF7CD"/>
+</svg>

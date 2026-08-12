@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="yuggoth">
+  <title>yuggoth — windowless towers</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#23262f"/>
+      <stop offset="1" stop-color="#14161c"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="62" height="62" rx="14" fill="url(#bg)" stroke="#3a3f4d" stroke-width="2"/>
+  <path d="M13 50 V30 h8 v20" fill="none" stroke="#A0C6B8" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M27 50 V20 h4 v-6 h4 v36" fill="none" stroke="#A0C6B8" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M43 50 V26 h8 v24" fill="none" stroke="#A0C6B8" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M10 50 h44" stroke="#A0C6B8" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="52" cy="13" r="1.6" fill="#FFD584"/>
+  <circle cx="17" cy="14" r="1.2" fill="#ACA57B"/>
+</svg>
