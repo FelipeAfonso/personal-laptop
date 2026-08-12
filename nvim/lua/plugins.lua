@@ -1,22 +1,10 @@
--- Setup for the ~11 packs declared in init.lua. Ordered: colorscheme first.
+-- Setup for the ~10 packs declared in init.lua. Ordered: colorscheme first.
 
--- ── neopywal + wallust ──────────────────────────────────────────────────────
-require('neopywal').setup {
-  -- Wallust-generated palette from ~/.cache/wallust/colors_neopywal.vim
-  use_palette = 'wallust',
-  transparent_background = true, -- matches ghostty opacity
-  dim_inactive = true,
-  terminal_colors = true,
-  default_plugins = true,
-  plugins = {
-    gitsigns = true,
-    treesitter = true,
-    mini = {
-      pick = true,
-    },
-  },
-}
-pcall(vim.cmd.colorscheme, 'neopywal')
+-- ── colorscheme ─────────────────────────────────────────────────────────────
+-- No wallust/neopywal on this machine — builtin scheme, transparent like ghostty
+vim.cmd.colorscheme 'retrobox'
+vim.api.nvim_set_hl(0, 'Normal', { bg = 'NONE' })
+vim.api.nvim_set_hl(0, 'NormalNC', { bg = 'NONE' })
 
 -- ── mini.nvim: ai, surround, pairs, pick, extra ─────────────────────────────
 require('mini.ai').setup { n_lines = 500 }

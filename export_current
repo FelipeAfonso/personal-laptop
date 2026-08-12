@@ -10,11 +10,6 @@ for d in $dirs; do
 done
 
 cp -f ./zsh/.zshenv "$HOME/.zshenv"
-cp -f ./aerospace/aerospace.toml "$HOME/.aerospace.toml"
-
-# Frozen wallust palette so neopywal keeps miskatonic's colors
-mkdir -p "$HOME/.cache/wallust"
-cp -f ./nvim/colors_neopywal.vim "$HOME/.cache/wallust/colors_neopywal.vim"
 
 mkdir -p "$HOME/.local/bin"
 cp -f ./bin/* "$HOME/.local/bin/"

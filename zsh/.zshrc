@@ -108,9 +108,6 @@ for p in zsh-autosuggestions zsh-syntax-highlighting zsh-history-substring-searc
   [[ -f "/opt/homebrew/share/$p/$p.zsh" ]] && source "/opt/homebrew/share/$p/$p.zsh"
 done
 
-# --- Wallust colors (dynamic theming) ---
-[[ -f "$ZDOTDIR/zsh-colors.sh" ]] && source "$ZDOTDIR/zsh-colors.sh"
-
 # --- Secrets (written by secrets-pull from the private secrets repo) ---
 if [[ -f "$ZDOTDIR/.secrets.env" ]]; then
   set -a; source "$ZDOTDIR/.secrets.env"; set +a

@@ -10,8 +10,6 @@ for d in $dirs; do
   cp -r "$HOME/.config/$d" ./
 done
 
-cp -f "$HOME/.aerospace.toml" ./aerospace/aerospace.toml
-
 # Until ~/.gitconfig moves to the XDG path, it is the authoritative git config
 [ -f "$HOME/.gitconfig" ] && cp -f "$HOME/.gitconfig" ./git/config
 
@@ -20,10 +18,6 @@ rm -f ./zsh/.zsh_history ./zsh/.zcompdump* ./zsh/.secrets.env
 rm -rf ./tmux/plugins ./nvim/doc ./opencode/node_modules
 rm -rf ./karabiner/automatic_backups
 find . -name .DS_Store -delete
-
-# The frozen palette lives in the repo, not ~/.config/nvim — restore it if a
-# live nvim dir replaced the directory without it
-[ -f ./nvim/colors_neopywal.vim ] || git checkout -- nvim/colors_neopywal.vim || true
 
 mkdir -p ./bin
 for s in $scripts; do

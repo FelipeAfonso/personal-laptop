@@ -18,7 +18,6 @@ vim.pack.add {
   { src = 'https://github.com/stevearc/conform.nvim' },
   { src = 'https://github.com/aserowy/tmux.nvim' },
   { src = 'https://github.com/folke/lazydev.nvim' },
-  { src = 'https://github.com/RedsXDD/neopywal.nvim', name = 'neopywal' },
 }
 
 require 'plugins'
