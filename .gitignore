@@ -8,3 +8,4 @@ zsh/.secrets.env
 *.zwc
 .DS_Store
 karabiner/automatic_backups/
+github-copilot/hosts.json
