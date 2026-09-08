@@ -16,3 +16,30 @@ cp -f ./bin/* "$HOME/.local/bin/"
 for s in ./bin/*; do
   chmod +x "$HOME/.local/bin/$(basename "$s")"
 done
+
+# Global agent prompts, one generated file per CLI: the per-CLI section,
+# the shared model table (models.md), then the yuggoth operating notes.
+# The first two are kept in sync by hand with personal-server's
+# home/felipe/agents/*.md and personal-desktop's agents/*.md. Edit
+# agents/*.md and re-run; never edit the generated files in place.
+mkdir -p "$HOME/.claude" "$HOME/.codex" "$HOME/.config/opencode"
+{ cat ./agents/claude-global.md; echo; cat ./agents/models.md; echo; cat ./agents/yuggoth-agents.md; } > "$HOME/.claude/CLAUDE.md"
+{ cat ./agents/codex-global.md; echo; cat ./agents/models.md; echo; cat ./agents/yuggoth-agents.md; } > "$HOME/.codex/AGENTS.md"
+{ cat ./agents/opencode-global.md; echo; cat ./agents/models.md; echo; cat ./agents/yuggoth-agents.md; } > "$HOME/.config/opencode/AGENTS.md"
+
+# Skills vendored in the repo so a fresh install has them. Claude Code reads
+# ~/.claude/skills; codex and opencode both read ~/.agents/skills. Other
+# entries in those dirs (installed with `npx skills add ...`) are left alone.
+mkdir -p "$HOME/.claude/skills" "$HOME/.agents/skills"
+cp -rf ./agents/skills/plan-html-workflow "$HOME/.claude/skills/"
+cp -rf ./agents/skills/unslop "$HOME/.claude/skills/"
+cp -rf ./agents/skills/unslop "$HOME/.agents/skills/"
+
+# Hook scripts referenced by ~/.claude/settings.json. That file stays mutable
+# (Claude Code writes to it at runtime), so the hooks block in it is set by
+# hand (see README); only the scripts are repo-managed.
+mkdir -p "$HOME/.claude/hooks"
+cp -f ./agents/hooks/* "$HOME/.claude/hooks/"
+for s in ./agents/hooks/*; do
+  chmod +x "$HOME/.claude/hooks/$(basename "$s")"
+done

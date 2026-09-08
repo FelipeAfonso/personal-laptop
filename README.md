@@ -19,6 +19,9 @@ karabiner/                        keyboard remaps (the XKB layout's successor)
 ghostty/ tmux/ zsh/ starship/     terminal stack (ghostty auto-attaches tmux session "main")
 nvim/                             clean-slate 0.12 config, vim.pack + lockfile, no Mason
 lazygit/ opencode/                git UI + agent
+agents/                           global agent prompts (one per CLI + shared model table + yuggoth
+                                  notes; export generates ~/.claude/CLAUDE.md, ~/.codex/AGENTS.md,
+                                  ~/.config/opencode/AGENTS.md), vendored skills, unslop hooks
 git/ btop/                        the long tail
 assets/icons/                     project icon candidates (gallery.html to browse)
 ```
@@ -34,6 +37,26 @@ assets/icons/                     project icon candidates (gallery.html to brows
 - **No theming pipeline.** miskatonic's wallpaper → wallust machinery stays
   on miskatonic; here everything runs stock colors (nvim uses a builtin
   colorscheme).
+- **Agent config is generated, shared with the fleet.** `export_current`
+  concatenates `agents/<cli>-global.md` and `agents/models.md` (the sections
+  shared with rlyeh and miskatonic, kept in sync by hand with
+  personal-server's `home/felipe/agents/*.md` and personal-desktop's
+  `agents/*.md`) with `agents/yuggoth-agents.md` (this machine, the tailnet,
+  how to operate the fleet) into each CLI's global prompt file. Edit the repo
+  files and re-export; never the generated ones. Skills (`agents/skills/`)
+  and the unslop hook scripts (`agents/hooks/`) are vendored and installed
+  the same way. The unslop hooks block in `~/.claude/settings.json` is the
+  one by-hand piece (Claude Code rewrites that file at runtime):
+
+  ```json
+  "hooks": {
+    "UserPromptSubmit": [{ "hooks": [{ "type": "command",
+      "command": "bash ~/.claude/hooks/unslop-reminder.sh", "timeout": 10 }] }],
+    "Stop": [{ "hooks": [{ "type": "command",
+      "command": "python3 ~/.claude/hooks/unslop-stop-gate.py", "timeout": 15,
+      "statusMessage": "Checking unslop compliance" }] }]
+  }
+  ```
 - **Secrets** live in the private, sops/age-encrypted
   [secrets](https://github.com/FelipeAfonso/secrets) repo, one file per host.
   `bin/secrets-pull` decrypts `yuggoth.yaml` into
