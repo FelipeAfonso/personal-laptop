@@ -37,16 +37,19 @@ assets/icons/                     project icon candidates (gallery.html to brows
 - **No theming pipeline.** miskatonic's wallpaper → wallust machinery stays
   on miskatonic; here everything runs stock colors (nvim uses a builtin
   colorscheme).
-- **Agent config is generated, shared with the fleet.** `export_current`
-  concatenates `agents/<cli>-global.md` and `agents/models.md` (the sections
-  shared with rlyeh and miskatonic, kept in sync by hand with
-  personal-server's `home/felipe/agents/*.md` and personal-desktop's
-  `agents/*.md`) with `agents/yuggoth-agents.md` (this machine, the tailnet,
-  how to operate the fleet) into each CLI's global prompt file. Edit the repo
-  files and re-export; never the generated ones. Skills (`agents/skills/`)
-  and the unslop hook scripts (`agents/hooks/`) are vendored and installed
-  the same way. The unslop hooks block in `~/.claude/settings.json` is the
-  one by-hand piece (Claude Code rewrites that file at runtime):
+- **Agent config is generated from shared sources.** `export_current`
+  combines `agents/<cli>-global.md`, `agents/models.md`, `agents/workflow.md`,
+  and `agents/yuggoth-agents.md` into each CLI's global instructions. Shared
+  sources live in personal-server's `home/felipe/agents/`. From that repo,
+  run `python3 scripts/sync-agent-prompts.py ../personal-laptop` to check
+  for drift; add `--write` to copy updates onto a clean task branch.
+  `./export_current --agents-only` installs the agent files, references,
+  skills, and hooks without changing unrelated laptop settings. Procedures
+  install under `~/.agents/references/` and are read when a task needs them.
+  The [model brief](agents/references/model-usage.md) explains the current
+  buckets and expected usage. Edit repository sources, not generated files.
+  The hooks block in `~/.claude/settings.json` stays separately maintained
+  because Claude writes that file at runtime:
 
   ```json
   "hooks": {

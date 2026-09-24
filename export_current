@@ -3,29 +3,43 @@
 # `brew bundle --file=Brewfile`.
 set -eu
 
-dirs="ghostty nvim opencode tmux zsh starship lazygit btop git karabiner"
+case "${1-}" in
+  ""|--agents-only) ;;
+  *) echo "Usage: ./export_current [--agents-only]" >&2; exit 2 ;;
+esac
+if [ "$#" -gt 1 ]; then
+  echo "Usage: ./export_current [--agents-only]" >&2
+  exit 2
+fi
 
-for d in $dirs; do
-  cp -rf "./$d" "$HOME/.config/"
-done
+if [ "${1-}" != --agents-only ]; then
 
-cp -f ./zsh/.zshenv "$HOME/.zshenv"
+  dirs="ghostty nvim opencode tmux zsh starship lazygit btop git karabiner"
 
-mkdir -p "$HOME/.local/bin"
-cp -f ./bin/* "$HOME/.local/bin/"
-for s in ./bin/*; do
-  chmod +x "$HOME/.local/bin/$(basename "$s")"
-done
+  for d in $dirs; do
+    cp -rf "./$d" "$HOME/.config/"
+  done
 
-# Global agent prompts, one generated file per CLI: the per-CLI section,
-# the shared model table (models.md), then the yuggoth operating notes.
-# The first two are kept in sync by hand with personal-server's
-# home/felipe/agents/*.md and personal-desktop's agents/*.md. Edit
-# agents/*.md and re-run; never edit the generated files in place.
+  cp -f ./zsh/.zshenv "$HOME/.zshenv"
+
+  mkdir -p "$HOME/.local/bin"
+  cp -f ./bin/* "$HOME/.local/bin/"
+  for s in ./bin/*; do
+    chmod +x "$HOME/.local/bin/$(basename "$s")"
+  done
+
+fi
+
+# Shared sources come from personal-server via scripts/sync-agent-prompts.py.
+# Append this machine's notes when generating the installed instructions.
 mkdir -p "$HOME/.claude" "$HOME/.codex" "$HOME/.config/opencode"
-{ cat ./agents/claude-global.md; echo; cat ./agents/models.md; echo; cat ./agents/yuggoth-agents.md; } > "$HOME/.claude/CLAUDE.md"
-{ cat ./agents/codex-global.md; echo; cat ./agents/models.md; echo; cat ./agents/yuggoth-agents.md; } > "$HOME/.codex/AGENTS.md"
-{ cat ./agents/opencode-global.md; echo; cat ./agents/models.md; echo; cat ./agents/yuggoth-agents.md; } > "$HOME/.config/opencode/AGENTS.md"
+{ cat ./agents/claude-global.md; echo; cat ./agents/models.md; echo; cat ./agents/workflow.md; echo; cat ./agents/yuggoth-agents.md; } > "$HOME/.claude/CLAUDE.md"
+{ cat ./agents/codex-global.md; echo; cat ./agents/models.md; echo; cat ./agents/workflow.md; echo; cat ./agents/yuggoth-agents.md; } > "$HOME/.codex/AGENTS.md"
+{ cat ./agents/opencode-global.md; echo; cat ./agents/models.md; echo; cat ./agents/workflow.md; echo; cat ./agents/yuggoth-agents.md; } > "$HOME/.config/opencode/AGENTS.md"
+
+# References are loaded only for tasks that need their procedures.
+mkdir -p "$HOME/.agents/references"
+cp -f ./agents/references/*.md "$HOME/.agents/references/"
 
 # Skills vendored in the repo so a fresh install has them. Claude Code reads
 # ~/.claude/skills; codex and opencode both read ~/.agents/skills. Other

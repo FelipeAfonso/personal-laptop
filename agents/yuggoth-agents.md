@@ -2,9 +2,7 @@
 
 You are running on **yuggoth**, Felipe's MacBook Air (macOS): a real display,
 browsers, audio, but on battery, often asleep, and only intermittently on the
-tailnet. Felipe is usually sitting right here when a session runs, so asking
-is cheap. Anything that must survive the lid closing belongs on rlyeh (see the
-fleet below).
+tailnet. Anything that must survive the lid closing belongs on rlyeh.
 
 ## Environment
 
@@ -18,9 +16,11 @@ fleet below).
   `agents/*.md` from that repo into `~/.claude/CLAUDE.md`,
   `~/.codex/AGENTS.md`, and `~/.config/opencode/AGENTS.md`. To change them,
   edit the repo files and re-export; edits to the generated files are lost on
-  the next export. The shared (non-machine) sections are kept in sync by hand
-  with `home/felipe/agents/*.md` in personal-server and `agents/*.md` in
-  personal-desktop.
+  the next export. Shared sources live in
+  personal-server's `home/felipe/agents/`. Use that repo's
+  `scripts/sync-agent-prompts.py` to check or update this repo's copies.
+  Use `./export_current --agents-only` to apply agent changes without
+  exporting unrelated laptop settings.
 - sudo asks for Felipe's password. Don't build automation that assumes
   unattended root; surface the sudo step so he can run or approve it.
 - Secrets: `secrets-pull` decrypts the private sops/age secrets repo into
@@ -46,7 +46,7 @@ Full name for any of them is `<host>.bass-pirarucu.ts.net`.
 
 Dev servers: Felipe also opens them from the phone or the desktop, so prefer
 binding `0.0.0.0` and handing over the tailnet URL
-(`http://yuggoth.bass-pirarucu.ts.net:<port>`) alongside `localhost`. Never
+(`http://yuggoth.bass-pirarucu.ts.net:<port>`). Never
 enable `tailscale funnel`, and never run `tailscale up/down/logout` or change
 ACLs unless Felipe asks for exactly that.
 
