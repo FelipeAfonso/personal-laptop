@@ -1,4 +1,3 @@
-window-decoration = false
 command = /bin/zsh -l -c "tmux new-session -A -s main"
 font-family = "CaskaydiaCove Nerd Font"
 font-feature = -calt
