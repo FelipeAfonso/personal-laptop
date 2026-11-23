@@ -33,8 +33,12 @@ tailnet. Anything that must survive the lid closing belongs on rlyeh.
 ## Network: the tailnet and the fleet
 
 Everything rides Tailscale. The tailnet is `bass-pirarucu.ts.net` with
-MagicDNS on, so every machine resolves by bare hostname (`ssh rlyeh` works,
-no `~/.ssh/config` needed).
+MagicDNS on, so every machine resolves by bare hostname.
+
+The account here is `felipeafonso`. On rlyeh and miskatonic it is `felipe`,
+so name the user when you SSH out: `ssh felipe@miskatonic`. `ssh rlyeh` works
+bare only because `~/.ssh/config` sets `User felipe` for it. Other machines
+reach this one as `felipeafonso@yuggoth`.
 
 | host           | what it is                                | tailscale IP   | OS    |
 | -------------- | ----------------------------------------- | -------------- | ----- |
