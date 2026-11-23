@@ -20,7 +20,7 @@ ghostty/ tmux/ zsh/ starship/     terminal stack (ghostty auto-attaches tmux ses
 nvim/                             clean-slate 0.12 config, vim.pack + lockfile, no Mason
 lazygit/ opencode/                git UI + agent
 agents/                           global agent prompts (one per CLI + shared model table + yuggoth
-                                  notes; export generates ~/.claude/CLAUDE.md, ~/.codex/AGENTS.md,
+                                  notes; export generates ~/.claude/CLAUDE.md, ~/.gemini/config/AGENTS.md,
                                   ~/.config/opencode/AGENTS.md), vendored skills, unslop hooks
 git/ btop/                        the long tail
 assets/icons/                     project icon candidates (gallery.html to browse)
@@ -44,7 +44,10 @@ assets/icons/                     project icon candidates (gallery.html to brows
   run `python3 scripts/sync-agent-prompts.py ../personal-laptop` to check
   for drift; add `--write` to copy updates onto a clean task branch.
   `./export_current --agents-only` installs the agent files, references,
-  skills, and hooks without changing unrelated laptop settings. Procedures
+  skills, and hooks without changing unrelated laptop settings. The skills
+  go into `~/.claude/skills/`, `~/.agents/skills/`, and
+  `~/.gemini/config/skills/`. Neon runs through the Antigravity CLI; run
+  `agy` once to sign in with the Google AI account. Procedures
   install under `~/.agents/references/` and are read when a task needs them.
   The [model brief](agents/references/model-usage.md) explains the current
   buckets and expected usage. Edit repository sources, not generated files.

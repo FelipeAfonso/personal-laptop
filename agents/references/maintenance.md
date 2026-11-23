@@ -26,7 +26,7 @@ task, even when its machine is offline. Report pending machine deployments.
 
 Home Manager installs rlyeh's files during a system rebuild. On miskatonic
 and yuggoth, `./export_current --agents-only` installs instructions, references,
-skills, and hook scripts. It leaves unrelated machine settings alone. Compare every
+skills (including `pr-review`), and hook scripts. It leaves unrelated machine settings alone. Compare every
 generated prompt with its source and check reference links after deployment.
 Existing conversations may retain older instructions.
 
@@ -40,6 +40,6 @@ the prose. Do not bypass the gate.
 
 The scripts are repository-managed. The hooks block in settings.json is
 maintained separately because Claude writes to that file at runtime. Preserve
-unrelated settings when repairing it. Codex and OpenCode read the unslop
+unrelated settings when repairing it. Antigravity and OpenCode read the unslop
 skill directly when they have no Skill tool; Claude's hook mechanics do not
 apply to those clients.

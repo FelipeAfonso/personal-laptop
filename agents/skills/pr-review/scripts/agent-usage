@@ -1,0 +1,224 @@
+#!/usr/bin/env python3
+"""Report how much of each provider's weekly subscription allowance is used.
+
+Anthropic: a one-word Claude prompt whose stream carries the weekly window.
+Google: the weekly Gemini window that the Antigravity CLI's /usage command
+reports. That command runs no model.
+
+Prints JSON: {"anthropic": {...}, "google": {...}}. A provider that cannot be
+read has "weekly_used_percent": null and an "error". Unknown never means
+exhausted or unlimited.
+"""
+
+import argparse
+from datetime import datetime
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import time
+
+CACHE = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "agent-usage.json"
+PROBE_TIMEOUT = 180
+MAX_READING_AGE = 24 * 3600
+API_KEYS = ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "GEMINI_API_KEY", "GOOGLE_API_KEY")
+
+
+def child_env():
+    """Probes run on the subscriptions, so API keys never reach a child."""
+    return {name: value for name, value in os.environ.items() if name not in API_KEYS}
+
+
+def find_cli(name):
+    """Agent CLIs live outside the system PATH on some machines."""
+    found = shutil.which(name)
+    if found:
+        return found
+    for directory in (".local/bin", ".bun/bin"):
+        candidate = Path.home() / directory / name
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return str(candidate)
+    return None
+
+
+def unknown(error):
+    return {"weekly_used_percent": None, "error": error}
+
+
+def still_valid(reading, now=None):
+    """A reading from before its window reset, or older than a day, says nothing."""
+    now = time.time() if now is None else now
+    if not reading or reading.get("weekly_used_percent") is None:
+        return False
+    reset = reading.get("resets_at")
+    if isinstance(reset, (int, float)) and reset <= now:
+        return False
+    return now - reading.get("observed_at", 0) <= MAX_READING_AGE
+
+
+def parse_claude_stream(lines, now):
+    """Weekly reading from `claude -p --output-format stream-json` output."""
+    reading = None
+    for line in lines:
+        try:
+            event = json.loads(line)
+        except ValueError:
+            continue
+        if not isinstance(event, dict) or event.get("type") != "rate_limit_event":
+            continue
+        info = event.get("rate_limit_info") or {}
+        windows = {
+            name: window for name, window in (info.get("unifiedWindows") or {}).items()
+            if name.startswith("seven_day") and isinstance(window, dict)
+            and isinstance(window.get("utilization"), (int, float))
+        }
+        if not windows and str(info.get("rateLimitType", "")).startswith("seven_day") \
+                and isinstance(info.get("utilization"), (int, float)):
+            windows = {info["rateLimitType"]: info}
+        if not windows:
+            continue
+        # Several weekly windows can apply; the fullest one is the constraint.
+        name, window = max(windows.items(), key=lambda item: item[1]["utilization"])
+        reading = {
+            "weekly_used_percent": round(window["utilization"] * 100, 1),
+            "resets_at": window.get("resetsAt"),
+            "observed_at": int(now),
+            "source": f"claude probe ({name})",
+        }
+        if window.get("status") == "rejected":
+            reading["weekly_used_percent"] = max(reading["weekly_used_percent"], 100.0)
+    return reading
+
+
+def probe_claude():
+    claude = find_cli("claude")
+    if not claude:
+        return unknown("claude CLI not found")
+    try:
+        result = subprocess.run(
+            [claude, "-p", "Reply with the single word ok", "--model", "haiku",
+             "--safe-mode", "--tools", "", "--no-session-persistence",
+             "--output-format", "stream-json", "--verbose"],
+            capture_output=True, text=True, timeout=PROBE_TIMEOUT, cwd=Path.home(),
+            stdin=subprocess.DEVNULL, env=child_env(),
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        return unknown(f"claude probe failed: {error}")
+    reading = parse_claude_stream(result.stdout.splitlines(), time.time())
+    return reading or unknown("claude probe reported no weekly window")
+
+
+def parse_agy_usage(text, now):
+    """Weekly Gemini reading from `agy --output-format json -p=/usage`."""
+    try:
+        groups = json.loads(text)["command"]["data"]["groups"]
+    except (ValueError, KeyError, TypeError):
+        return None
+    for group in groups if isinstance(groups, list) else []:
+        if not isinstance(group, dict) or not str(group.get("name", "")).startswith("Gemini"):
+            continue
+        for bucket in group.get("buckets") or []:
+            if not isinstance(bucket, dict) or bucket.get("window") != "weekly":
+                continue
+            left = bucket.get("remaining_fraction")
+            if not isinstance(left, (int, float)):
+                continue
+            try:
+                reset = int(datetime.fromisoformat(
+                    str(bucket.get("reset_time")).replace("Z", "+00:00")).timestamp())
+            except ValueError:
+                reset = None
+            return {
+                "weekly_used_percent": round(min(100.0, max(0.0, (1 - left) * 100)), 1),
+                "resets_at": reset,
+                "observed_at": int(now),
+                "source": "agy /usage",
+            }
+    return None
+
+
+def newest_agy_model(listing, family, effort):
+    """(id, name) of the highest listed version of a Gemini class at one effort.
+
+    `listing` is `agy models` output: an id, a tab, and a label on each line,
+    e.g. "gemini-4-neon-xhigh<TAB>Gemini 4 Neon (XHigh)".
+    """
+    pattern = re.compile(rf"gemini-(\d+(?:\.\d+)*)-{re.escape(family)}-{re.escape(effort)}")
+    candidates = []
+    for line in listing.splitlines():
+        slug, _, label = line.partition("\t")
+        match = pattern.fullmatch(slug.strip())
+        if match:
+            name = re.sub(r"\s*\([^)]*\)\s*$", "", label.strip()) or slug.strip()
+            candidates.append((tuple(int(part) for part in match[1].split(".")),
+                               slug.strip(), name))
+    return max(candidates)[1:] if candidates else None
+
+
+def run_agy(arguments, timeout):
+    """Run agy on the signed-in Google subscription; None when it cannot run."""
+    agy = find_cli("agy")
+    if not agy:
+        return None
+    try:
+        return subprocess.run([agy, *arguments], capture_output=True, text=True,
+                              timeout=timeout, cwd=Path.home(),
+                              stdin=subprocess.DEVNULL, env=child_env())
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+
+def read_google():
+    """The weekly Gemini window. /usage runs no model, so nothing is cached."""
+    if not find_cli("agy"):
+        return unknown("agy CLI not found")
+    result = run_agy(["--output-format", "json", "-p=/usage"], PROBE_TIMEOUT)
+    if result is None or result.returncode:
+        return unknown("agy could not report usage; sign in by running agy once")
+    return parse_agy_usage(result.stdout, time.time()) \
+        or unknown("agy reported no weekly Gemini window")
+
+
+def read_anthropic(max_age, probe):
+    cached = None
+    try:
+        cached = json.loads(CACHE.read_text()).get("anthropic")
+    except (OSError, ValueError, AttributeError):
+        pass
+    if not still_valid(cached):
+        cached = None
+    if cached and time.time() - cached["observed_at"] <= max_age:
+        return cached
+    if not probe:
+        return cached or unknown("no current Claude reading")
+    reading = probe_claude()
+    if reading.get("weekly_used_percent") is None:
+        return reading
+    try:
+        CACHE.parent.mkdir(parents=True, exist_ok=True)
+        CACHE.write_text(json.dumps({"anthropic": reading}))
+    except OSError:
+        pass
+    return reading
+
+
+def read_usage(max_age=3600, probe=True):
+    return {"anthropic": read_anthropic(max_age, probe), "google": read_google()}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--max-age", type=int, default=3600,
+                        help="seconds a reading stays fresh (default 3600)")
+    parser.add_argument("--no-probe", action="store_true",
+                        help="report recorded readings only; never run a model")
+    args = parser.parse_args()
+    print(json.dumps(read_usage(args.max_age, not args.no_probe), indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

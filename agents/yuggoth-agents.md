@@ -14,7 +14,7 @@ tailnet. Anything that must survive the lid closing belongs on rlyeh.
   records it.
 - These very instructions are generated: `export_current` concatenates
   `agents/*.md` from that repo into `~/.claude/CLAUDE.md`,
-  `~/.codex/AGENTS.md`, and `~/.config/opencode/AGENTS.md`. To change them,
+  `~/.gemini/config/AGENTS.md`, and `~/.config/opencode/AGENTS.md`. To change them,
   edit the repo files and re-export; edits to the generated files are lost on
   the next export. Shared sources live in
   personal-server's `home/felipe/agents/`. Use that repo's
@@ -25,7 +25,8 @@ tailnet. Anything that must survive the lid closing belongs on rlyeh.
   unattended root; surface the sudo step so he can run or approve it.
 - Secrets: `secrets-pull` decrypts the private sops/age secrets repo into
   `~/.config/zsh/.secrets.env` (0600, gitignored), which zsh exports. The
-  `claude`, `codex`, `opencode`, and `gh` CLIs are already authenticated.
+  `claude`, `opencode`, and `gh` CLIs are already authenticated. `agy` needs
+  its own sign-in with the Google AI account before Neon can run.
 - No tiling WM, no theming pipeline, stock colors. Karabiner does the
   keyboard remaps.
 
