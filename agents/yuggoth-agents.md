@@ -36,9 +36,8 @@ Everything rides Tailscale. The tailnet is `bass-pirarucu.ts.net` with
 MagicDNS on, so every machine resolves by bare hostname.
 
 The account here is `felipeafonso`. On rlyeh and miskatonic it is `felipe`,
-so name the user when you SSH out: `ssh felipe@miskatonic`. `ssh rlyeh` works
-bare only because `~/.ssh/config` sets `User felipe` for it. Other machines
-reach this one as `felipeafonso@yuggoth`.
+so name the user when you SSH out: `ssh felipe@rlyeh`, `ssh felipe@miskatonic`.
+Other machines reach this one as `felipeafonso@yuggoth`.
 
 | host           | what it is                                | tailscale IP   | OS    |
 | -------------- | ----------------------------------------- | -------------- | ----- |
@@ -59,13 +58,13 @@ ACLs unless Felipe asks for exactly that.
 
 - rlyeh is the workhorse: anything long-running, scheduled, or always-on
   (watchers, servers, bots, overnight jobs) belongs there, not on this
-  laptop. `ssh rlyeh`, start it detached (`tmux new -d -s <name>` or
+  laptop. `ssh felipe@rlyeh`, start it detached (`tmux new -d -s <name>` or
   `systemd-run --user --unit <name>`), and report the unit or session name
   and how to stop it.
 - rlyeh is pure-flake NixOS, defined by the personal-server repo
   (`~/code/personal/personal-server` on rlyeh). Never change rlyeh
   imperatively: edit the flake, push, then
-  `ssh rlyeh 'sudo nixos-rebuild switch --flake ~/code/personal/personal-server#rlyeh'`
+  `ssh felipe@rlyeh 'sudo nixos-rebuild switch --flake ~/code/personal/personal-server#rlyeh'`
   (rlyeh has passwordless sudo). That repo takes no PRs: push a branch, then
   ask Felipe before merging to main.
 - rlyeh's `t3code.service` (port 3773) is its #1 service: never kill it,
